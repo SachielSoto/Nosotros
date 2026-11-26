@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuestro rincón</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root { --vino:#4a0f33; --noche:#2c0720; --rosa:#ff5c8a; --mantequilla:#ffd166; --papel:#fff8fb; --tinta:#3a0f28; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; font-family:"Bricolage Grotesque",system-ui,sans-serif; color:var(--papel);
+         background:var(--noche) radial-gradient(ellipse 100% 900px at 50% 0,#8c1f57,var(--vino) 45%,var(--noche)) no-repeat; }
+  main { max-width:860px; margin:auto; padding:40px 16px 130px; text-align:center; }
+  h1 { margin:0; font-size:clamp(3rem,13vw,6.5rem); font-weight:800; line-height:.95; letter-spacing:-.03em; }
+  h2 { margin:56px 0 16px; font-size:1.7rem; }
+  #contador { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:520px; margin:28px auto 0; }
+  #contador div { padding:14px 4px; border-radius:18px; background:#ffffff14; }
+  #contador b { display:block; font-size:clamp(2rem,9vw,3.2rem); line-height:1; color:var(--mantequilla); font-variant-numeric:tabular-nums; }
+  input, textarea { width:100%; margin:6px 0; padding:13px; border:2px solid #e9b7cb; border-radius:12px; font:inherit; background:#fff; color:var(--tinta); }
+  button { padding:13px 20px; border:0; border-radius:999px; font:inherit; font-weight:600; background:var(--rosa); color:var(--noche); cursor:pointer; }
+  button:disabled { opacity:.5; }
+  :focus-visible { outline:3px solid var(--mantequilla); outline-offset:2px; }
+  #login, details { max-width:460px; margin:20px auto; padding:18px; border-radius:20px; background:var(--papel); color:var(--tinta); }
+  form button { width:100%; margin-top:8px; }
+  summary { font-weight:800; font-size:1.15rem; cursor:pointer; }
+  .foto, article { background:var(--papel); color:var(--tinta); border-radius:4px; padding:14px 14px 18px; box-shadow:0 18px 40px #0007; overflow-wrap:anywhere; }
+  .foto { position:relative; max-width:460px; margin:auto; transform:rotate(-1.5deg); }
+  .foto::before { content:""; position:absolute; top:-14px; left:50%; width:120px; height:30px; background:#ffd166cc; transform:translateX(-50%) rotate(3deg); }
+  #diapo { display:block; width:100%; height:min(420px,95vw); object-fit:contain; background:var(--noche); }
+  #diapo.revelar { animation:revelar 1.2s ease-out; }
+  @keyframes revelar { from { filter:brightness(2.2) saturate(0) blur(5px); } }
+  h3 { margin:10px 0 0; font-family:Caveat,cursive; font-size:2rem; line-height:1.1; }
+  .controles { display:flex; justify-content:center; gap:8px; margin-top:12px; }
+  #lista { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),400px)); justify-content:center; align-items:start; gap:26px; margin-top:28px; }
+  article { transform:rotate(1.2deg); }
+  article:nth-child(even) { transform:rotate(-1.4deg); }
+  article img { display:block; width:100%; }
+  article p { white-space:pre-wrap; }
+  article button { padding:6px 14px; font-size:.85rem; background:#f6dbe6; }
+  #abrir { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:2; width:min(360px,calc(100% - 32px));
+           padding:17px; font-size:1.15rem; background:var(--mantequilla); box-shadow:0 10px 30px #0008; }
+  dialog { width:min(420px,calc(100% - 24px)); border:0; border-radius:24px; padding:20px; background:var(--papel); color:var(--tinta); text-align:center; }
+  dialog::backdrop { background:#1a0413cc; }
+  #opciones { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
+  #opciones button { border-radius:16px; background:#ffe0eb; }
+  #cerrar { background:none; text-decoration:underline; }
+  [hidden] { display:none !important; }
+  @media (prefers-reduced-motion:reduce) { #diapo.revelar { animation:none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Nuestro rincón</h1>
+  <div id="contador" aria-label="Tiempo que llevamos juntos" hidden></div>
+
+  <button type="button" id="abrir">¿Cómo te sientes?</button>
+  <dialog id="animos" aria-label="¿Cómo te sientes?">
+    <h3>¿Cómo te sientes?</h3>
+    <textarea id="nota" rows="2" maxlength="300" placeholder="¿Quieres contarme algo? (opcional)"></textarea>
+    <div id="opciones">
+      <button type="button" data-msg="Me siento triste">😢 Triste</button>
+      <button type="button" data-msg="Estoy enojada">😠 Enojada</button>
+      <button type="button" data-msg="Me siento mal">🤒 Me siento mal</button>
+      <button type="button" data-msg="Estoy estresada">😣 Estresada</button>
+      <button type="button" data-msg="Te extraño">🥺 Te extraño</button>
+      <button type="button" data-msg="Necesito un abrazo">🤗 Un abrazo</button>
+    </div>
+    <p id="estado" role="status"></p>
+    <button type="button" id="cerrar">Cerrar</button>
+  </dialog>
+
+  <h2>Nuestros recuerdos</h2>
+  <p id="aviso" role="status"></p>
+  <form id="login" hidden>
+    <input id="correo" type="email" placeholder="Correo" required autocomplete="username">
+    <input id="clave" type="password" placeholder="Contraseña" required autocomplete="current-password">
+    <button>Entrar</button>
+  </form>
+  <section id="recuerdos" hidden>
+    <div id="carrusel" hidden>
+      <h2>Nuestra línea de tiempo</h2>
+      <div class="foto">
+        <img id="diapo" alt="">
+        <h3 id="diapoTitulo"></h3>
+        <small id="diapoInfo"></small>
+        <div class="controles">
+          <button type="button" id="anterior" aria-label="Foto anterior">◀</button>
+          <button type="button" id="pausa"></button>
+          <button type="button" id="siguiente" aria-label="Foto siguiente">▶</button>
+        </div>
+      </div>
+    </div>
+    <details>
+    <summary>Agregar un recuerdo</summary>
+    <form id="nuevo">
+      <input id="titulo" maxlength="80" placeholder="Título del recuerdo" required>
+      <input id="fecha" type="date" required aria-label="Fecha">
+      <textarea id="texto" rows="3" maxlength="1000" placeholder="¿Qué pasó ese día?"></textarea>
+      <input id="foto" type="file" accept="image/*" aria-label="Foto (opcional)">
+      <button id="guardar">Guardar recuerdo</button>
+    </form>
+    </details>
+    <div id="lista"></div>
+  </section>
+</main>
+<script>
+  let TEMA = ""; // Se carga desde la base de datos al iniciar sesión
+
+  const estado = document.getElementById("estado");
+  const nota = document.getElementById("nota");
+  const botones = document.querySelectorAll("[data-msg]");
+  const ventana = document.getElementById("animos");
+
+  document.getElementById("abrir").onclick = () => { estado.textContent = ""; ventana.showModal(); };
+  document.getElementById("cerrar").onclick = () => ventana.close();
+
+  botones.forEach(boton => boton.onclick = async () => {
+    if (!TEMA) {
+      estado.textContent = "No se envió: falta iniciar sesión o configurar los avisos.";
+      return;
+    }
+    const extra = nota.value.trim();
+    const mensaje = boton.dataset.msg + (extra ? ": " + extra : "");
+    botones.forEach(b => b.disabled = true);
+    estado.textContent = "Enviando...";
+    try {
+      const r = await fetch("https://ntfy.sh/" + TEMA, { method: "POST", body: mensaje });
+      if (!r.ok) throw new Error(r.status);
+      estado.textContent = "Aviso enviado 💌";
+      nota.value = "";
+    } catch (e) {
+      estado.textContent = "No se pudo enviar. Mejor mándame mensaje o llámame.";
+    }
+    setTimeout(() => botones.forEach(b => b.disabled = false), 5000);
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(() => {
+  // ===== CONFIGURA AQUÍ =====
+  const SUPABASE_URL = "";    // Project URL
+  const SUPABASE_KEY = "";    // Publishable o anon key (NUNCA la secret / service_role)
+  const FECHA_INICIO = "";    // Formato AAAA-MM-DD, ejemplo: 2025-02-14
+  // ==========================
+
+  const $ = id => document.getElementById(id);
+  const prueba = !SUPABASE_URL || !SUPABASE_KEY;
+  let db, demo = [];
+
+  // Contador en vivo: años, meses, días, horas, minutos y segundos
+  function tiempoJuntos(inicio, ahora) {
+    const [a, m, d] = inicio.split("-").map(Number);
+    const fin = Date.UTC(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), ahora.getHours(), ahora.getMinutes(), ahora.getSeconds());
+    // Suma meses sin pasarse del último día del mes (ej. 31 de enero + 1 mes)
+    const sumar = n => Date.UTC(a, m - 1 + n, Math.min(d, new Date(Date.UTC(a, m + n, 0)).getUTCDate()));
+    if (!(fin >= sumar(0))) return null;
+    let meses = (ahora.getFullYear() - a) * 12 + ahora.getMonth() - (m - 1);
+    if (sumar(meses) > fin) meses--;
+    let seg = Math.floor((fin - sumar(meses)) / 1000);
+    const dias = Math.floor(seg / 86400); seg %= 86400;
+    const parte = (n, uno, varios) => [n, n === 1 ? uno : varios];
+    return [parte(Math.floor(meses / 12), "año", "años"), parte(meses % 12, "mes", "meses"), parte(dias, "día", "días"),
+      parte(Math.floor(seg / 3600), "hora", "horas"), parte(Math.floor(seg / 60) % 60, "minuto", "minutos"),
+      parte(seg % 60, "segundo", "segundos")];
+  }
+  function contar() {
+    const t = FECHA_INICIO && tiempoJuntos(FECHA_INICIO, new Date());
+    $("contador").hidden = !t;
+    if (t) $("contador").replaceChildren(...t.map(([n, nombre]) => {
+      const caja = document.createElement("div"), num = document.createElement("b");
+      num.textContent = n; caja.append(num, nombre); return caja;
+    }));
+  }
+  contar();
+  setInterval(contar, 1000);
+
+  // Carrusel: pasa las fotos de la más antigua a la más reciente
+  let fotos = [], actual = 0, reloj;
+  let pausado = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function pintar() {
+    const f = fotos[actual];
+    $("diapo").src = f.url; $("diapo").alt = f.titulo;
+    $("diapo").classList.remove("revelar"); void $("diapo").offsetWidth; $("diapo").classList.add("revelar");
+    $("diapoTitulo").textContent = f.titulo;
+    $("diapoInfo").textContent = new Date(f.fecha + "T12:00:00").toLocaleDateString("es-MX", { dateStyle: "long" }) + ", foto " + (actual + 1) + " de " + fotos.length;
+  }
+  function programar() {
+    clearInterval(reloj);
+    $("pausa").textContent = pausado ? "Reproducir" : "Pausar";
+    if (!pausado && fotos.length > 1) reloj = setInterval(() => mover(1), 4000);
+  }
+  function mover(paso) {
+    actual = (actual + paso + fotos.length) % fotos.length;
+    pintar();
+  }
+  function carrusel(filas) {
+    fotos = filas.filter(f => f.url).sort((x, y) => x.fecha.localeCompare(y.fecha));
+    actual = 0;
+    $("carrusel").hidden = !fotos.length;
+    if (fotos.length) pintar();
+    programar();
+  }
+  $("anterior").onclick = () => { mover(-1); programar(); };
+  $("siguiente").onclick = () => { mover(1); programar(); };
+  $("pausa").onclick = () => { pausado = !pausado; programar(); };
+
+  function mostrar(dentro) {
+    $("login").hidden = dentro;
+    $("recuerdos").hidden = !dentro;
+    if (!dentro) { $("lista").replaceChildren(); carrusel([]); }
+  }
+
+  async function cargarAvisos() {
+    const { data, error } = await db.from("ajustes").select("valor").eq("clave", "ntfy").maybeSingle();
+    if (!error && data) TEMA = data.valor;
+  }
+
+  async function cargar() {
+    let filas = demo;
+    if (!prueba) {
+      const { data, error } = await db.from("recuerdos").select("*").order("fecha", { ascending: false });
+      if (error) throw error;
+      filas = data;
+      const rutas = filas.filter(f => f.foto).map(f => f.foto);
+      if (rutas.length) {
+        const firmadas = await db.storage.from("fotos").createSignedUrls(rutas, 3600);
+        if (firmadas.error) throw firmadas.error;
+        const urls = Object.fromEntries(firmadas.data.map(x => [x.path, x.signedUrl]));
+        filas.forEach(f => f.url = urls[f.foto]);
+      }
+    }
+    carrusel(filas);
+    $("lista").replaceChildren(...[...filas].sort((x, y) => y.fecha.localeCompare(x.fecha)).map(tarjeta));
+    if (!filas.length) $("lista").textContent = "Aún no hay recuerdos. ¡Agreguen el primero!";
+  }
+
+  function tarjeta(f) {
+    const el = (tag, txt) => { const n = document.createElement(tag); if (txt) n.textContent = txt; return n; };
+    const art = el("article");
+    if (f.url) { const img = el("img"); img.src = f.url; img.alt = f.titulo; img.loading = "lazy"; art.append(img); }
+    const fecha = new Date(f.fecha + "T12:00:00").toLocaleDateString("es-MX", { dateStyle: "long" });
+    const borrar = el("button", "Borrar");
+    borrar.onclick = async () => {
+      if (!confirm("¿Borrar este recuerdo?")) return;
+      try {
+        if (prueba) demo = demo.filter(x => x !== f);
+        else {
+          const r = await db.from("recuerdos").delete().eq("id", f.id);
+          if (r.error) throw r.error;
+          if (f.foto) await db.storage.from("fotos").remove([f.foto]);
+        }
+        await cargar();
+      } catch (e) { $("aviso").textContent = "No se pudo borrar: " + e.message; }
+    };
+    art.append(el("h3", f.titulo), el("small", fecha), el("p", f.texto), borrar);
+    return art;
+  }
+
+  // Reduce la foto antes de subirla para ahorrar espacio
+  async function reducir(archivo) {
+    const img = await createImageBitmap(archivo).catch(() => { throw new Error("formato de foto no compatible, usa JPG o PNG"); });
+    const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    return new Promise(ok => c.toBlob(ok, "image/jpeg", 0.85));
+  }
+
+  $("nuevo").onsubmit = async ev => {
+    ev.preventDefault();
+    $("guardar").disabled = true;
+    $("aviso").textContent = "Guardando...";
+    try {
+      const fila = { titulo: $("titulo").value.trim(), fecha: $("fecha").value, texto: $("texto").value.trim() };
+      const archivo = $("foto").files[0];
+      const blob = archivo ? await reducir(archivo) : null;
+      if (prueba) demo.push({ ...fila, url: blob && URL.createObjectURL(blob) });
+      else {
+        if (blob) {
+          fila.foto = crypto.randomUUID() + ".jpg";
+          const s = await db.storage.from("fotos").upload(fila.foto, blob, { contentType: "image/jpeg" });
+          if (s.error) throw s.error;
+        }
+        const r = await db.from("recuerdos").insert(fila);
+        if (r.error) throw r.error;
+      }
+      ev.target.reset();
+      $("aviso").textContent = prueba ? "Modo de prueba: se borrará al recargar." : "Recuerdo guardado 💖";
+      await cargar();
+    } catch (e) { $("aviso").textContent = "No se pudo guardar: " + e.message; }
+    $("guardar").disabled = false;
+  };
+
+  const fallo = e => $("aviso").textContent = "No se pudieron cargar: " + e.message;
+
+  if (prueba) {
+    $("aviso").textContent = "Modo de prueba: nada se guarda todavía.";
+    mostrar(true); cargar();
+  } else if (!window.supabase) {
+    $("aviso").textContent = "No se pudo conectar. Revisa tu internet y recarga.";
+  } else {
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    $("login").onsubmit = async ev => {
+      ev.preventDefault();
+      const { error } = await db.auth.signInWithPassword({ email: $("correo").value, password: $("clave").value });
+      if (error) { $("aviso").textContent = "Correo o contraseña incorrectos, o sin conexión."; return; }
+      $("aviso").textContent = ""; $("clave").value = "";
+      mostrar(true); cargarAvisos(); cargar().catch(fallo);
+    };
+    db.auth.getSession().then(({ data }) => {
+      mostrar(!!data.session);
+      if (data.session) { cargarAvisos(); cargar().catch(fallo); }
+    });
+  }
+})();
+</script>
+</body>
+</html>
